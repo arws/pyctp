@@ -182,7 +182,7 @@ void MdApi::subscribe()
 	{
 		req[i++] = const_cast<char*>(contract.c_str());
 	}
-	int j = this->_api->SubscribeMarketData(req, contract_name_list.size());
+	size_t j = this->_api->SubscribeMarketData(req, contract_name_list.size());
 	delete[] req;
 }
 
@@ -307,7 +307,7 @@ int MdApi::join()
 	int i = this->_api->Join();
 	return i;
 }
-
+ 
 string MdApi::getTradingDay()
 {
 	string day = this->_api->GetTradingDay();
@@ -385,146 +385,6 @@ void MdApi::process_on_rsp_unsub_for_quote_rsp(Task task)
 	cout << "取消询价回报,代码" << instrument_field.InstrumentID << endl;
 }
 
-void MdApi::insert_data(CThostFtdcDepthMarketDataField market_data, string tick_file)
-{
-	fstream f((tick_file).c_str(), ios::app | ios::out | ios::ate);
-	
-	if(static_cast<int>(f.tellp())==ios::beg)
-	{
-		f   << "交易日"             << 	  ","
-			<< "合约代码"			<<	  ","
-			<< "交易所代码"		    <<	  ","
-			<< "合约在交易所的代码" <<	  ","
-			<< "最新价"			    <<	  ","
-			<< "上次结算价"		    <<	  ","
-			<< "昨收盘"			    <<	  ","
-			<< "昨持仓量"			<<	  ","
-			<< "今开盘"			    <<	  ","
-			<< "最高价"			    <<	  ","
-			<< "最低价"			    <<	  ","
-			<< "数量"				<<	  ","
-			<< "成交金额"			<<	  ","
-			<< "持仓量"			    <<	  ","
-			<< "今收盘"			    <<	  ","
-			<< "本次结算价"		    <<	  ","
-			<< "涨停板价"			<<	  ","
-			<< "跌停板价"			<<	  ","
-			<< "昨虚实度"			<<	  ","
-			<< "今虚实度"			<<	  ","
-			<< "最后修改时间"		<<	  ","
-			<< "最后修改毫秒"		<<	  ","
-			<< "申买价一"			<<	  ","
-			<< "申买量一"			<<	  ","
-			<< "申卖价一"			<<	  ","
-			<< "申卖量一"			<<	  ","
-			<< "申买价二"			<<	  ","
-			<< "申买量二"			<<	  ","
-			<< "申卖价二"			<<	  ","
-			<< "申卖量二"			<<	  ","
-			<< "申买价三"			<<	  ","
-			<< "申买量三"			<<	  ","
-			<< "申卖价三"			<<	  ","
-			<< "申卖量三"			<<	  ","
-			<< "申买价四"			<<	  ","
-			<< "申买量四"			<<	  ","
-			<< "申卖价四"			<<	  ","
-			<< "申卖量四"			<<	  ","
-			<< "申买价五"			<<	  ","
-			<< "申买量五"			<<	  ","
-			<< "申卖价五"			<<	  ","
-			<< "申卖量五"			<<	  ","
-			<< "当日均价"			<<	  ","
-			<< "业务日期"
-			<< endl;
-		f << market_data.TradingDay << ","
-			<< market_data.InstrumentID << ","
-			<< market_data.ExchangeID << ","
-			<< market_data.ExchangeInstID << ","
-			<< market_data.LastPrice << ","
-			<< market_data.PreSettlementPrice << ","
-			<< market_data.PreClosePrice << ","
-			<< market_data.PreOpenInterest << ","
-			<< market_data.OpenPrice << ","
-			<< market_data.HighestPrice << ","
-			<< market_data.LowestPrice << ","
-			<< market_data.Volume << ","
-			<< market_data.Turnover << ","
-			<< market_data.OpenInterest << ","
-			<< market_data.ClosePrice << ","
-			<< market_data.SettlementPrice << ","
-			<< market_data.UpperLimitPrice << ","
-			<< market_data.LowerLimitPrice << ","
-			<< market_data.CurrDelta << ","
-			<< market_data.UpdateTime << ","
-			<< market_data.UpdateMillisec << ","
-			<< market_data.BidPrice1 << ","
-			<< market_data.BidVolume1 << ","
-			<< market_data.AskPrice1 << ","
-			<< market_data.AskVolume1 << ","
-			<< market_data.BidPrice2 << ","
-			<< market_data.BidVolume2 << ","
-			<< market_data.AskPrice2 << ","
-			<< market_data.AskVolume2 << ","
-			<< market_data.BidPrice3 << ","
-			<< market_data.BidVolume3 << ","
-			<< market_data.AskPrice3 << ","
-			<< market_data.AskVolume3 << ","
-			<< market_data.BidPrice4 << ","
-			<< market_data.BidVolume4 << ","
-			<< market_data.AskPrice4 << ","
-			<< market_data.AskVolume4 << ","
-			<< market_data.BidPrice5 << ","
-			<< market_data.BidVolume5 << ","
-			<< market_data.AskPrice5 << ","
-			<< market_data.AskVolume5 << "," << endl;
-			
-	}
-	else
-	{
-		f   << market_data.TradingDay << ","
-			<< market_data.InstrumentID << ","
-			<< market_data.ExchangeID << ","
-			<< market_data.ExchangeInstID << ","
-			<< market_data.LastPrice << ","
-			<< market_data.PreSettlementPrice << ","
-			<< market_data.PreClosePrice << ","
-			<< market_data.PreOpenInterest << ","
-			<< market_data.OpenPrice << ","
-			<< market_data.HighestPrice << ","
-			<< market_data.LowestPrice << ","
-			<< market_data.Volume << ","
-			<< market_data.Turnover << ","
-			<< market_data.OpenInterest << ","
-			<< market_data.ClosePrice << ","
-			<< market_data.SettlementPrice << ","
-			<< market_data.UpperLimitPrice << ","
-			<< market_data.LowerLimitPrice << ","
-			<< market_data.CurrDelta << ","
-			<< market_data.UpdateTime << ","
-			<< market_data.UpdateMillisec << ","
-			<< market_data.BidPrice1<< ","
-			<< market_data.BidVolume1 << ","
-			<< market_data.AskPrice1<< ","
-			<< market_data.AskVolume1 << ","
-			<< market_data.BidPrice2<< ","
-			<< market_data.BidVolume2 << ","
-			<< market_data.AskPrice2<< ","
-			<< market_data.AskVolume2 << ","
-			<< market_data.BidPrice3<< ","
-			<< market_data.BidVolume3 << ","
-			<< market_data.AskPrice3<< ","
-			<< market_data.AskVolume3 << ","
-			<< market_data.BidPrice4<< ","
-			<< market_data.BidVolume4 << ","
-			<< market_data.AskPrice4<< ","
-			<< market_data.AskVolume4 << ","
-			<< market_data.BidPrice5<< ","
-			<< market_data.BidVolume5 << ","
-			<< market_data.AskPrice5<< ","
-			<< market_data.AskVolume5 << "," << endl;
-	}
-}
-
 void MdApi::process_on_rtn_depth_market_data(Task task)
 {
 	cout << " ---------------深度行情通知-------------------" << endl;
@@ -583,4 +443,119 @@ void MdApi::process_on_rtn_for_quote_rsp(Task task)
 	cout << "交易日：" << quote_rsp.TradingDay	<<endl;
 	cout << "交易时间:" << quote_rsp.ForQuoteTime<<endl;
 	cout << "交易系统代码:" << quote_rsp.ForQuoteSysID << endl;
+}
+
+
+void MdApi::insert_head(fstream& f)
+{
+	f << "交易日" << ","
+		<< "合约代码" << ","
+		<< "交易所代码" << ","
+		<< "合约在交易所的代码" << ","
+		<< "最新价" << ","
+		<< "上次结算价" << ","
+		<< "昨收盘" << ","
+		<< "昨持仓量" << ","
+		<< "今开盘" << ","
+		<< "最高价" << ","
+		<< "最低价" << ","
+		<< "数量" << ","
+		<< "成交金额" << ","
+		<< "持仓量" << ","
+		<< "今收盘" << ","
+		<< "本次结算价" << ","
+		<< "涨停板价" << ","
+		<< "跌停板价" << ","
+		<< "昨虚实度" << ","
+		<< "今虚实度" << ","
+		<< "最后修改时间" << ","
+		<< "最后修改毫秒" << ","
+		<< "申买价一" << ","
+		<< "申买量一" << ","
+		<< "申卖价一" << ","
+		<< "申卖量一" << ","
+		<< "申买价二" << ","
+		<< "申买量二" << ","
+		<< "申卖价二" << ","
+		<< "申卖量二" << ","
+		<< "申买价三" << ","
+		<< "申买量三" << ","
+		<< "申卖价三" << ","
+		<< "申卖量三" << ","
+		<< "申买价四" << ","
+		<< "申买量四" << ","
+		<< "申卖价四" << ","
+		<< "申卖量四" << ","
+		<< "申买价五" << ","
+		<< "申买量五" << ","
+		<< "申卖价五" << ","
+		<< "申卖量五" << ","
+		<< "当日均价" << ","
+		<< "业务日期"
+		<< endl;
+}
+
+void MdApi::insert_tick(CThostFtdcDepthMarketDataField& market_data, fstream& f)
+{
+	f << market_data.TradingDay << ","
+		<< market_data.InstrumentID << ","
+		<< market_data.ExchangeID << ","
+		<< market_data.ExchangeInstID << ","
+		<< (DBLMXTZERO(market_data.LastPrice)) << ","
+		<< (DBLMXTZERO(market_data.PreSettlementPrice)) << ","
+		<< (DBLMXTZERO(market_data.PreClosePrice)) << ","
+		<< market_data.PreOpenInterest << ","
+		<< (DBLMXTZERO(market_data.OpenPrice)) << ","
+		<< (DBLMXTZERO(market_data.HighestPrice)) << ","
+		<< (DBLMXTZERO(market_data.LowestPrice)) << ","
+		<< market_data.Volume << ","
+		<< market_data.Turnover << ","
+		<< market_data.OpenInterest << ","
+		<< (DBLMXTZERO(market_data.ClosePrice)) << ","
+		<< (DBLMXTZERO(market_data.SettlementPrice)) << ","
+		<< (DBLMXTZERO(market_data.UpperLimitPrice)) << ","
+		<< (DBLMXTZERO(market_data.LowerLimitPrice)) << ","
+		<< (DBLMXTZERO(market_data.PreDelta))  << ","
+		<< (DBLMXTZERO(market_data.CurrDelta)) << ","
+		<< market_data.UpdateTime << ","
+		<< market_data.UpdateMillisec << ","
+		<< (DBLMXTZERO(market_data.BidPrice1)) << ","
+		<< market_data.BidVolume1 << ","
+		<< (DBLMXTZERO(market_data.AskPrice1)) << ","
+		<< market_data.AskVolume1 << ","
+		<< (DBLMXTZERO(market_data.BidPrice2)) << ","
+		<< market_data.BidVolume2 << ","
+		<< (DBLMXTZERO(market_data.AskPrice2)) << ","
+		<< market_data.AskVolume2 << ","
+		<< (DBLMXTZERO(market_data.BidPrice3)) << ","
+		<< market_data.BidVolume3 << ","
+		<< (DBLMXTZERO(market_data.AskPrice3)) << ","
+		<< market_data.AskVolume3 << ","
+		<< (DBLMXTZERO(market_data.BidPrice4)) << ","
+		<< market_data.BidVolume4 << ","
+		<< (DBLMXTZERO(market_data.AskPrice4)) << ","
+		<< market_data.AskVolume4 << ","
+		<< (DBLMXTZERO(market_data.BidPrice5)) << ","
+		<< market_data.BidVolume5 << ","
+		<< (DBLMXTZERO(market_data.AskPrice5)) << ","
+		<< market_data.AskVolume5 << "," 
+	    << (DBLMXTZERO(market_data.AveragePrice)) << ","
+	    << market_data.ActionDay << ","
+		<< endl;
+}
+
+void MdApi::insert_data(CThostFtdcDepthMarketDataField market_data, string tick_file)
+{
+	fstream f((tick_file).c_str(), ios::app | ios::out | ios::ate);
+
+	if (static_cast<int>(f.tellp()) == ios::beg)
+	{
+		insert_head(f);
+		insert_tick(market_data, f);
+
+	}
+	else
+	{
+		insert_tick(market_data, f);
+	}
 }

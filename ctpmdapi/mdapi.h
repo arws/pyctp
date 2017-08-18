@@ -172,6 +172,8 @@ private:
 		 
 	void process_on_rtn_for_quote_rsp(Task task);
 
+	void insert_head(fstream& f);
+	void insert_tick(CThostFtdcDepthMarketDataField& market_data, fstream& f);
 
 
 	void insert_data(CThostFtdcDepthMarketDataField market_data, string filename);
