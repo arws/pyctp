@@ -6,6 +6,8 @@
 #include "ThostFtdcMdApi.h"
 #include "blockingconcurrentqueue.h"
 #include "boost/any.hpp"
+#include "easylogging++.h"
+
 
 #include "FileUtil.h"
 

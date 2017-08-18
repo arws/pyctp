@@ -17,7 +17,8 @@ void MdApi::OnFrontConnected()
 {
 	Task task;
 	task.name = ON_FRONT_CONNECTED;
-	cout << "连接成功！" << endl;
+	LOG(INFO) << "连接成功！" << endl;
+	//cout << "连接成功！" << endl;
 	this->_queue.enqueue(task);
 }
 
@@ -26,7 +27,7 @@ void MdApi::OnFrontDisconnected(int nReason)
 	Task task;
 	task.name = ON_FRONT_DISCONNECTED;
 	task.task_data = nReason;
-	cout << "连接断开！" << endl;
+	LOG(INFO) << "连接断开！" << endl;
 	this->_queue.enqueue(task);
 }
 
@@ -35,7 +36,7 @@ void MdApi::OnHeartBeatWarning(int nTimeLapse)
 	Task task;
 	task.name = ON_HEARTBEAT_WARNING;
 	task.task_data = nTimeLapse;
-	cout << "心跳警告！" << endl;
+	LOG(INFO) << "心跳警告！" << endl;
 	push_task(task);
 }
 
@@ -47,7 +48,17 @@ void MdApi::OnRspUserLogin(CThostFtdcRspUserLoginField* pRspUserLogin, CThostFtd
 	task.task_error = *pRspInfo;
 	task.request_id = nRequestID;
 	task.is_last = bIsLast;
-	cout << "登陆成功！" << endl;
+	LOG(INFO) << "登陆成功！" << endl;
+	LOG(INFO) << "用户:" << pRspUserLogin->UserID << endl;
+	LOG(INFO) << "经纪商" << pRspUserLogin->BrokerID << endl;
+	LOG(INFO) << "日期:" << pRspUserLogin->TradingDay << endl;
+	LOG(INFO) << "登录时间:" << pRspUserLogin->LoginTime << endl;
+	LOG(INFO) << "郑商所时间:" << pRspUserLogin->CZCETime << endl;
+	LOG(INFO) << "大商所时间:" << pRspUserLogin->DCETime << endl;
+	LOG(INFO) << "中金所时间：" << pRspUserLogin->FFEXTime << endl;
+	LOG(INFO) << "上期所时间: " << pRspUserLogin->SHFETime << endl;
+	LOG(INFO) << "能源中心时间:" << pRspUserLogin->INETime << endl;
+	//cout << "登陆成功！" << endl;
 	push_task(task);
 	this->subscribe();
 }
@@ -60,7 +71,7 @@ void MdApi::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRs
 	task.task_error = *pRspInfo;
 	task.request_id = nRequestID;
 	task.is_last = bIsLast;
-	cout << "登出成功！" << endl;
+	LOG(INFO) << "登出成功！" << endl;
 	push_task(task);
 }
 
@@ -72,7 +83,7 @@ void MdApi::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bI
 	task.task_error = *pRspInfo;
 	task.request_id = nRequestID;
 	task.is_last = bIsLast;
-	cout << "error!" << endl;
+	LOG(INFO) << "error!" << endl;
 	push_task(task);
 };
 
@@ -84,8 +95,10 @@ void MdApi::OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstr
 	task.task_error = *pRspInfo;
 	task.request_id = nRequestID;
 	task.is_last = bIsLast;
-	cout << "订阅回报!" << endl;
-	cout << "订阅合约:" << pSpecificInstrument->InstrumentID << "回报信息:" << pRspInfo->ErrorMsg << endl;
+	LOG(INFO) << string("订阅合约:") << pSpecificInstrument->InstrumentID << string("回报信息:") << pRspInfo->ErrorMsg << endl;
+	
+	//cout << "订阅回报!" << endl;
+	//cout << "订阅合约:" << pSpecificInstrument->InstrumentID << "回报信息:" << pRspInfo->ErrorMsg << endl;
 	push_task(task);
 }
 
@@ -152,6 +165,7 @@ void MdApi::connect()
 	this->_api->RegisterSpi(this);
 	this->_api->RegisterFront(const_cast<char*>(cfg.Read("MarketFront", string("")).c_str()));
 	this->_api->Init();
+	LOG(INFO) << "启动ctp" << endl;
 	//this->api->Join();
 }
 
@@ -160,6 +174,7 @@ void MdApi::close()
 	this->_api->RegisterSpi(nullptr);
 	this->_api->Release();
 	this->_api = nullptr;
+	LOG(INFO) << "系统关闭" << endl;
 }
 
 void MdApi::subscribe()
@@ -182,7 +197,8 @@ void MdApi::subscribe()
 	{
 		req[i++] = const_cast<char*>(contract.c_str());
 	}
-	size_t j = this->_api->SubscribeMarketData(req, contract_name_list.size());
+	int j = this->_api->SubscribeMarketData(req, contract_name_list.size());
+	LOG(INFO) << "订阅全部合约" << endl;
 	delete[] req;
 }
 
@@ -204,7 +220,8 @@ void MdApi::login()
 	strcpy_s(login_req.Password, sizeof(login_req.Password), password.c_str());
 
 	int i = this->_api->ReqUserLogin(&login_req, ++request_id);
-	cout << "登陆返回码" << i << endl;
+	LOG(INFO) << "登陆返回码:" << i << endl;
+	//cout << "登陆返回码" << i << endl;
 }
 
 void MdApi::logout()
@@ -317,34 +334,36 @@ string MdApi::getTradingDay()
 
 void MdApi::process_on_front_connected(Task task)
 {
-	cout << "登陆成功" << endl;
+	/*cout << "登陆成功" << endl;*/
 	this->login();
 }
 
 void MdApi::process_on_front_disconneted(Task task)
 {
 	int reason = boost::any_cast<int>(task.task_data);
-	cout << "连接断开，原因:" << reason << endl;
+	//cout << "连接断开，原因:" << reason << endl;
 }
 
 void MdApi::process_on_heartbeat_warning(Task task)
 {
 	int time_elapsed =  boost::any_cast<int>(task.task_data);
-	cout << "心跳警告:" << time_elapsed << "未收到心跳" << endl;
+	//cout << "心跳警告:" << time_elapsed << "未收到心跳" << endl;
 }
 
 void MdApi::process_on_rsp_userlogin(Task task)
 {
 	CThostFtdcRspUserLoginField login_field = boost::any_cast<CThostFtdcRspUserLoginField>(task.task_data);
-	cout << "用户:" << login_field.UserID << endl;
-	cout << "经纪商" << login_field.BrokerID << endl;
-	cout << "日期:" << login_field.TradingDay << endl;
-	cout << "登录时间:" << login_field.LoginTime << endl;
-	cout << "郑商所时间:" << login_field.CZCETime << endl;
-	cout << "大商所时间:" << login_field.DCETime << endl;
-	cout << "中金所时间：" << login_field.FFEXTime << endl;
-	cout << "上期所时间: " << login_field.SHFETime << endl;
-	cout << "能源中心时间:" << login_field.INETime << endl;
+
+
+	//cout << "用户:" << login_field.UserID << endl;
+	//cout << "经纪商" << login_field.BrokerID << endl;
+	//cout << "日期:" << login_field.TradingDay << endl;
+	//cout << "登录时间:" << login_field.LoginTime << endl;
+	//cout << "郑商所时间:" << login_field.CZCETime << endl;
+	//cout << "大商所时间:" << login_field.DCETime << endl;
+	//cout << "中金所时间：" << login_field.FFEXTime << endl;
+	//cout << "上期所时间: " << login_field.SHFETime << endl;
+	//cout << "能源中心时间:" << login_field.INETime << endl;
 }
 
 void MdApi::process_on_rsp_user_logout(Task task)
@@ -364,7 +383,8 @@ void MdApi::process_on_rsp_error(Task task)
 void MdApi::process_on_rsp_submarket_data(Task task)
 {
 	CThostFtdcSpecificInstrumentField instrument_field = boost::any_cast<CThostFtdcSpecificInstrumentField>(task.task_data);
-	cout << "订阅回报,代码:" << instrument_field.InstrumentID << endl;
+	//LOG(INFO) << "订阅回报,代码:" << instrument_field.InstrumentID << endl;
+	//cout << "订阅回报,代码:" << instrument_field.InstrumentID << endl;
 }
 
 void MdApi::process_on_rsp_unsubmarket_data(Task task)
@@ -389,24 +409,24 @@ void MdApi::process_on_rtn_depth_market_data(Task task)
 {
 	cout << " ---------------深度行情通知-------------------" << endl;
 	CThostFtdcDepthMarketDataField market_data = boost::any_cast<CThostFtdcDepthMarketDataField>(task.task_data);
-	cout<< "代码：" << market_data.InstrumentID<<endl;
-	cout<< "交易日：" << market_data.TradingDay	 <<endl;
-	cout<< "业务日：" << market_data.ActionDay	 <<endl;
-	cout << "时间:" << market_data.UpdateTime << ":" << market_data.UpdateMillisec << endl;
-	cout << "最新价  " << "成交量  " << "开盘价  " << "最高价  " << "最低价  " << endl;
-	cout << market_data.LastPrice << "  " << market_data.Volume << "  " << market_data.OpenPrice << "  " << market_data.HighestPrice << "  " << market_data.LowestPrice << endl;
+	//cout<< "代码：" << market_data.InstrumentID<<endl;
+	//cout<< "交易日：" << market_data.TradingDay	 <<endl;
+	//cout<< "业务日：" << market_data.ActionDay	 <<endl;
+	//cout << "时间:" << market_data.UpdateTime << ":" << market_data.UpdateMillisec << endl;
+	//cout << "最新价  " << "成交量  " << "开盘价  " << "最高价  " << "最低价  " << endl;
+	//cout << market_data.LastPrice << "  " << market_data.Volume << "  " << market_data.OpenPrice << "  " << market_data.HighestPrice << "  " << market_data.LowestPrice << endl;
 
-	cout << "五" << market_data.AskPrice5 << "  " << market_data.AskVolume5<<endl;
-	cout << "四" << market_data.AskPrice4 << "  " << market_data.AskVolume4<<endl;
-	cout << "三" << market_data.AskPrice3 << "  " << market_data.AskVolume3<<endl;
-	cout << "二" << market_data.AskPrice2 << "  " << market_data.AskVolume2<<endl;
-	cout << "一" << market_data.AskPrice1 << "  " << market_data.AskVolume1<<endl;
-	cout << "---------------------------------------------------------------------" << endl;
-	cout << "一" << market_data.BidPrice1 << "  " << market_data.BidVolume1 << endl;
-	cout << "二" << market_data.BidPrice2 << "  " << market_data.BidVolume2 << endl;
-	cout << "三" << market_data.BidPrice3 << "  " << market_data.BidVolume3 << endl;
-	cout << "四" << market_data.BidPrice4 << "  " << market_data.BidVolume4 << endl;
-	cout << "五" << market_data.BidPrice5 << "  " << market_data.BidVolume5 << endl;
+	//cout << "五" << market_data.AskPrice5 << "  " << market_data.AskVolume5<<endl;
+	//cout << "四" << market_data.AskPrice4 << "  " << market_data.AskVolume4<<endl;
+	//cout << "三" << market_data.AskPrice3 << "  " << market_data.AskVolume3<<endl;
+	//cout << "二" << market_data.AskPrice2 << "  " << market_data.AskVolume2<<endl;
+	//cout << "一" << market_data.AskPrice1 << "  " << market_data.AskVolume1<<endl;
+	//cout << "---------------------------------------------------------------------" << endl;
+	//cout << "一" << market_data.BidPrice1 << "  " << market_data.BidVolume1 << endl;
+	//cout << "二" << market_data.BidPrice2 << "  " << market_data.BidVolume2 << endl;
+	//cout << "三" << market_data.BidPrice3 << "  " << market_data.BidVolume3 << endl;
+	//cout << "四" << market_data.BidPrice4 << "  " << market_data.BidVolume4 << endl;
+	//cout << "五" << market_data.BidPrice5 << "  " << market_data.BidVolume5 << endl;
 
 	auto& config = Config::getConfig("config.ini");
 	string tick_path = config.Read("TickDir", string(""));

@@ -1,8 +1,6 @@
 #include "mdapi.h"
 #include "tdapi.h"
 #include <Windows.h>
-#include <iostream>
-
 
 //investerID:092433
 //brokerID:9999
@@ -14,8 +12,14 @@
 //218.202.237.33 :10002   218.202.237.33 :10012
 //
 //180.168.146.187:10030   180.168.146.187:10031 (7*24)
+
+
+INITIALIZE_EASYLOGGINGPP
+
 int main()
 {
+	el::Configurations log_config("log-config.ini");
+	el::Loggers::reconfigureAllLoggers(log_config);
 	MdApi api;
 	api.init();
 	api.connect();
