@@ -593,13 +593,6 @@ int MdApi::join() const
 	return i;
 }
 
-int MdApi::exit()
-{
-	this->api->RegisterSpi(nullptr);
-	this->api->Release();
-	this->api = nullptr;
-	return 1;
-}
 
 string MdApi::getTradingDay() const
 {

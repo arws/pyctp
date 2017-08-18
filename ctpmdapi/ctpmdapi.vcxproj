@@ -142,11 +142,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="blockingconcurrentqueue.h" />
+    <ClInclude Include="concurrentqueue.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="FileUtil.h" />
     <ClInclude Include="mdapi.h" />
+    <ClInclude Include="tdapi.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mdapi.cpp" />
+    <ClCompile Include="tdapi.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
