@@ -165,7 +165,7 @@ void MdApi::connect()
 	this->_api->RegisterSpi(this);
 	this->_api->RegisterFront(const_cast<char*>(cfg.Read("MarketFront", string("")).c_str()));
 	this->_api->Init();
-	LOG(INFO) << "启动ctp" << endl;
+	LOG(INFO) << "行情系统初始化" << endl;
 	//this->api->Join();
 }
 
@@ -174,7 +174,7 @@ void MdApi::close()
 	this->_api->RegisterSpi(nullptr);
 	this->_api->Release();
 	this->_api = nullptr;
-	LOG(INFO) << "系统关闭" << endl;
+	LOG(INFO) << "行情系统关闭" << endl;
 }
 
 void MdApi::subscribe()
@@ -220,7 +220,7 @@ void MdApi::login()
 	strcpy_s(login_req.Password, sizeof(login_req.Password), password.c_str());
 
 	int i = this->_api->ReqUserLogin(&login_req, ++request_id);
-	LOG(INFO) << "登陆返回码:" << i << endl;
+	LOG(INFO) << "准备登陆行情前置,登陆返回码:" << i << endl;
 	//cout << "登陆返回码" << i << endl;
 }
 

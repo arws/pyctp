@@ -35,6 +35,7 @@ void tdapi::join()
 void tdapi::connect()
 {
 	api->Init();
+	LOG(INFO) << "开始连接交易前置" << endl;
 }
 
 void tdapi::login()
@@ -53,7 +54,7 @@ void tdapi::login()
 	strcpy_s(login_req.Password, sizeof(login_req.Password), password.c_str());
 
 	int i = this->api->ReqUserLogin(&login_req, ++request_id);
-	cout << "登陆返回码" << i << endl;
+	LOG(INFO) << "启动ctp trader api" << endl;
 }
 
 void tdapi::logout()
@@ -71,7 +72,8 @@ void tdapi::logout()
 
 
 	int i = this->api->ReqUserLogout(&logout_req, ++request_id);
-	cout << "登出返回码:" << i << endl;
+
+	LOG(INFO) << "准备登陆交易前置,登陆返回码:" << i << endl;
 }
 
 void tdapi::close()
@@ -79,55 +81,60 @@ void tdapi::close()
 	this->api->RegisterSpi(nullptr);
 	this->api->Release();
 	this->api = nullptr;
+	LOG(INFO) << "交易api关闭" << endl;
 }
 
 void tdapi::query_all_contract()
 {
 	CThostFtdcQryInstrumentField req;
+
+	auto& config = Config::getConfig("config.ini");
+	auto symbol_file = config.Read("symbolDir", string(""));
+	remove(symbol_file.c_str());
+
 	memset(&req, 0, sizeof(req));
 	api->ReqQryInstrument(&req, ++request_id);
+	LOG(INFO) << "开始查询全部合约" << endl;
 }
 
 void tdapi::OnFrontConnected()
 {
-	std::cout << "交易前置连接成功" << endl;
+	LOG(INFO) << "交易前置连接成功" << endl;
 	this->login();
 }
 
 void tdapi::OnFrontDisconnected(int nReason)
 {
-	cout << "断开连接,原因:" << nReason<< endl;
+	LOG(INFO) << "交易连接断开,原因" << nReason << endl;
 }
 
 void tdapi::OnHeartBeatWarning(int nTimeLapse)
 {
-	cout << "心跳警告:" << nTimeLapse << endl;
+	LOG(INFO) << "心跳警告:" << nTimeLapse << endl;
 }
 
 void tdapi::OnRspAuthenticate(CThostFtdcRspAuthenticateField* pRspAuthenticateField, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 {
-	cout << "客户端响应认证" << endl;
+	LOG(INFO) << "客户端响应认证" << endl;
 }
 
 void tdapi::OnRspUserLogin(CThostFtdcRspUserLoginField* pRspUserLogin, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 {
-	std::cout << "交易登陆成功"<<endl;
+	LOG(INFO) << "交易登陆成功"<<endl;
 	this->query_all_contract();
 }
 
 void tdapi::OnRspUserLogout(CThostFtdcUserLogoutField* pUserLogout, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 {
-	cout << "登出回报" << endl;
-	cout << "用户:" << pUserLogout->UserID << endl;
-	cout << "经纪商:" << pUserLogout->BrokerID << endl;
+	LOG(INFO) << "交易登出回报" << endl;
+	LOG(INFO) << "用户:" << pUserLogout->UserID << endl;
+	LOG(INFO) << "经纪商:" << pUserLogout->BrokerID << endl;
 }
 
 void tdapi::OnRspQryInstrument(CThostFtdcInstrumentField* pInstrument, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 {
-	std::cout << "合约回报" << endl;
-	cout << pInstrument->InstrumentID << endl;
-	cout << pInstrument->InstrumentName << endl;
-	cout << pInstrument->ExchangeID << endl;
+	//LOG(INFO) << string("订阅合约:") << pInstrument->InstrumentID << string("回报信息:") << pRspInfo->ErrorMsg << endl;
+	//LOG(INFO) << string("订阅合约:") << pInstrument->InstrumentID << string("回报信息:") << pRspInfo->ErrorMsg << endl;
 	auto& cfg = Config::getConfig("config.ini");
 	string symbol_file = cfg.Read("symbolDir", string(""));
 	fstream f(symbol_file.c_str(), ios::out|ios::app);

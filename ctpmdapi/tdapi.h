@@ -2,6 +2,7 @@
 #include <iostream>
 #include "ThostFtdcTraderApi.h"
 #include "Config.h"
+#include "easylogging++.h"
 
 using namespace std;
 class tdapi: CThostFtdcTraderSpi

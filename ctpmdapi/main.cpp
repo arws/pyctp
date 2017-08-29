@@ -1,7 +1,8 @@
 #include "mdapi.h"
 #include "tdapi.h"
 #include <Windows.h>
-
+#include "easylogging++.h"
+#include "../../!/boost/include/boost-1_59/boost/date_time/posix_time/ptime.hpp"
 //investerID:092433
 //brokerID:9999
 //password:zm19641
@@ -20,14 +21,16 @@ int main()
 {
 	el::Configurations log_config("log-config.ini");
 	el::Loggers::reconfigureAllLoggers(log_config);
+	tdapi tapi;
+	tapi.init();
+	tapi.connect();
+	
+	Sleep(20000);
 	MdApi api;
 	api.init();
 	api.connect();
-	//tdapi api;
-	//api.init();
-	//api.connect();
+	
 	system("pause");
 	api.close();
-	system("pause");
 	return 0;
 }
